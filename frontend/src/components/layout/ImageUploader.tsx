@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
+type ColorResult = {
+    color: [number, number, number]
+    percentage: number
+}
+
 type AnalysisResult = {
     filename: string,
     content_type: string,
-    size: number
+    size: number,
+    dimensions: number[]
+    colors: ColorResult[]
 }
 
 export function ImageUploader() {
@@ -32,7 +39,7 @@ export function ImageUploader() {
         return formData
     }
 
-    
+
     const analyzeImage = async () => {
         const formData = prepareImageData()
 
@@ -41,7 +48,7 @@ export function ImageUploader() {
         setIsLoading(true)
         setError(null)
 
-        try{
+        try {
             const response = await fetch(
                 'http://127.0.0.1:8000/images/analyze',
                 {
@@ -50,7 +57,7 @@ export function ImageUploader() {
                 }
             )
 
-            if(!response.ok){
+            if (!response.ok) {
                 throw new Error('Não foi possivel analisar a imagem.')
             }
 
@@ -58,10 +65,10 @@ export function ImageUploader() {
 
             setAnalysisResult(data)
 
-        } catch (error){
+        } catch (error) {
             setError(error instanceof Error ? error.message : 'Ocorreu um erro inesperado.')
 
-        } finally{
+        } finally {
             setIsLoading(false)
         }
     }
@@ -110,11 +117,11 @@ export function ImageUploader() {
                             }}>
                             Remover imagem
                         </Button>
-                        <Button 
+                        <Button
                             onClick={analyzeImage}
                             disabled={isLoading}
-                            >
-                                {isLoading ? 'A analisar...' : 'Analisar imagem'}
+                        >
+                            {isLoading ? 'A analisar...' : 'Analisar imagem'}
                         </Button>
                     </div>
                 )}
@@ -126,9 +133,26 @@ export function ImageUploader() {
                         <p>Ficheiro: {analysisResult.filename}</p>
                         <p>Formato: {analysisResult.content_type}</p>
                         <p>Tamanho: {analysisResult.size} bytes</p>
-                    </div>
-                )}
+                        <p>Dimensões: {analysisResult.dimensions[0]} x {analysisResult.dimensions[1]}</p>
+                        <div>
+                            <h5>Cores Predominantes</h5>
 
+                            {analysisResult.colors.map((item, index) => (
+                                <div key={index} className='flex items-center gap-3'>
+                                    <div className='h-8 w-8 rounded border'
+                                        style={{
+                                            backgroundColor: `rgb(${item.color.join(',')})`
+                                        }}/>
+                                    <p className='text-sm'>
+                                        RGB({item.color.join(', ')}) - {item.percentage}%
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                )}
+                
                 {error && (
                     <p className="text-sm text-red-600">
                         {error}

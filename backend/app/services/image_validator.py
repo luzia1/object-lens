@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from PIL import Image
 from io import BytesIO
 
-MAX_FILE_SIZE = 1 * 1024 * 1024 
+MAX_FILE_SIZE = 10 * 1024 * 1024 
 
 def validate_format(content_type: str):
     if content_type not in ["image/jpeg", "image/png"]:
