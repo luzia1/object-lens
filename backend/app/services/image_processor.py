@@ -8,31 +8,14 @@ def decode_image(contents: bytes):
     
     return image
 
-#apenas para testes temporários
-# inicio
-def image_processor(image, x: int, y: int):
-    return image[y, x]
-
-def create_test_mask(image):
-    height, width = image.shape[:2]
-    mask = np.zeros((height, width), dtype=np.uint8)
-    
-    mask[100:300, 200:400] = 255
-
-    return mask
-#fim
-
 def convert_to_hsv(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    print("Primeiros 5 píxeis hsv:", hsv_image[0, :5])
 
     return hsv_image
 
 def extract_object_hsv_pixels(hsv_image, mask):
     object_hsv_pixels = hsv_image[mask == 255]
-    print("Dimensões dos píxeis HSV:", object_hsv_pixels.shape)
-    print("Primeiros 5 píxeis:", object_hsv_pixels[:5])
-    
+
     return object_hsv_pixels
 
 def convert_hue_to_coordinates(hsv_pixels):
@@ -55,8 +38,11 @@ def prepare_color_features(hsv_pixels):
     return features
 
 def cluster_colors(features):
+    unique_features = np.unique(features, axis=0)
+    n_clusters = min(3, len(unique_features))
+
     kmeans = KMeans(
-        n_clusters=3,
+        n_clusters=n_clusters,
         random_state=42,
         n_init=10
     )
@@ -81,16 +67,12 @@ def cluster_colors(features):
 
     results.sort(key=lambda item: item["percentage"], reverse=True)
 
-    print("Resultados", results)
-
     return results
 
 def calculate_color_percentages(labels):
     counts = np.bincount(labels)
 
     percentages = (counts/ len(labels)) * 100
-
-    print("percentages: ", percentages)
 
     return percentages
 

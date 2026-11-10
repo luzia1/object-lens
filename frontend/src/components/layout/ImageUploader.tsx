@@ -6,12 +6,20 @@ type ColorResult = {
     percentage: number
 }
 
+type ObjectResults = {
+    object_id: number,
+    class_id: number,
+    class_name: string,
+    confidence: number
+    colors: ColorResult[]
+}
+
 type AnalysisResult = {
     filename: string,
     content_type: string,
     size: number,
     dimensions: number[]
-    colors: ColorResult[]
+    object_results: ObjectResults[]
 }
 
 export function ImageUploader() {
@@ -136,23 +144,32 @@ export function ImageUploader() {
                         <p>Dimensões: {analysisResult.dimensions[0]} x {analysisResult.dimensions[1]}</p>
                         <div>
                             <h5>Cores Predominantes</h5>
-
-                            {analysisResult.colors.map((item, index) => (
-                                <div key={index} className='flex items-center gap-3'>
-                                    <div className='h-8 w-8 rounded border'
-                                        style={{
-                                            backgroundColor: `rgb(${item.color.join(',')})`
-                                        }}/>
-                                    <p className='text-sm'>
-                                        RGB({item.color.join(', ')}) - {item.percentage}%
+                            {analysisResult.object_results.map((object) => (
+                                <div key={object.object_id} className="space-y-3 rounded-lg border p-4">
+                                    <h5 className='font-medium'>
+                                        Objeto {object.object_id} - {object.class_name}
+                                    </h5>
+                                    <p className='text-sm text-gray-500'>
+                                        Confiança: {(object.confidence * 100).toFixed(1)}%
                                     </p>
+
+                                    {object.colors.map((item, index) => (
+                                        <div key={index} className='flex items-center gap-3'>
+                                            <div className='h-8 w-8 rounded border'
+                                                style={{
+                                                    backgroundColor: `rgb(${item.color.join(',')})`
+                                                }}/>
+                                            <p className='text-sm'>
+                                                RGB({item.color.join(', ')}) - {item.percentage}%
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
                             ))}
                         </div>
                     </div>
-
                 )}
-                
+
                 {error && (
                     <p className="text-sm text-red-600">
                         {error}
